@@ -40,19 +40,7 @@ jobs:
         echo "tag=$(cat turnip_workdir/tag)" >> "$GITHUB_OUTPUT"
         echo "filename=$(cat turnip_workdir/filename)" >> "$GITHUB_OUTPUT"
         echo "patched=$(cat turnip_workdir/patched)" >> "$GITHUB_OUTPUT"
-        echo "experimental=$(cat turnip_workdir/experimental)" >> "$GITHUB_OUTPUT"
 
-    - name: Release "turnip" with experimental
-      if: ${{ contains(steps.versions.outputs.experimental, 'true') }}
-      uses: softprops/action-gh-release@v1
-      with:
-        body_path: turnip_workdir/description
-        name: ${{ steps.versions.outputs.name }}
-        tag_name: ${{ steps.versions.outputs.tag }}
-        files: |
-           turnip_workdir/${{ steps.versions.outputs.filename }}.zip
-           turnip_workdir/${{ steps.versions.outputs.filename }}_patched.zip
-           turnip_workdir/${{ steps.versions.outputs.filename }}_experimental.zip
       
     - name: Release "turnip" with patched
       if: ${{ contains(steps.versions.outputs.patched, 'true') }}
