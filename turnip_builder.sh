@@ -401,7 +401,7 @@ EOF
 	echo "Turnip - $mesa_version - $date" > release
 	echo "$mesa_version"_"$commit_short" > tag
 	echo  $filename > filename
-	echo "### Base commit : [$commit_short](https://gitlab.freedesktop.org/mesa/mesa/-/commit/7d9ba366d4098a49975e87cb1814f61eb43f52a1)" > description
+	echo "### Base commit : [$commit_short](https://gitlab.freedesktop.org/mesa/mesa/)" > description
 	echo "## Upstreams / Patches" >> description
 	
 	if (( ${#patches[@]} )); then
