@@ -172,11 +172,205 @@ cpu = 'armv8'
 endian = 'little'
 EOF
 
+        cat <<EOF >"android-arm32"
+[binaries]
+ar = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar'
+c = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang', '-O3', '-DVK_USE_PLATFORM_ANDROID_KHR', '-fPIC']
+cpp = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang++', '-O3', '-DVK_USE_PLATFORM_ANDROID_KHR', '-fPIC', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
+c_ld = 'lld'
+cpp_ld = 'lld'
+strip = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip'
+# Android doesn't come with a pkg-config, but we need one for meson to be happy not
+# finding all the optional deps it looks for.  Use system pkg-config pointing at a
+# directory we get to populate with any .pc files we want to add for Android
+
+# Also, include the plain DRM lib we found earlier. Panfrost relies on it rather heavily, especially when
+# interacting with the panfrost DRM module and not kbase
+
+pkgconfig = ['env', 'PKG_CONFIG_LIBDIR=.:/tmp/drm-static/lib/pkgconfig', '/usr/bin/pkg-config']
+
+[host_machine]
+system = 'linux'
+# cpu_family = 'x86_64'
+# cpu = 'amd64'
+
+# ik this is wrong but workaround sanity check
+cpu_family = 'arm'
+cpu = 'armv7'
+
+endian = 'little'
+EOF
+
+        cat <<EOF >"android-drm-aarch64"
+[binaries]
+ar = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar'
+c = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang', '-O3', '-DVK_USE_PLATFORM_ANDROID_KHR', '-fPIC']
+cpp = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang++', '-O3', '-DVK_USE_PLATFORM_ANDROID_KHR', '-fPIC', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
+c_ld = 'lld'
+cpp_ld = 'lld'
+strip = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip'
+# Android doesn't come with a pkg-config, but we need one for meson to be happy not
+# finding all the optional deps it looks for.  Use system pkg-config pointing at a
+# directory we get to populate with any .pc files we want to add for Android
+
+# Also, include the plain DRM lib we found earlier. Panfrost relies on it rather heavily, especially when
+# interacting with the panfrost DRM module and not kbase
+
+pkgconfig = ['env', 'PKG_CONFIG_LIBDIR=.:/tmp/drm-static/lib/pkgconfig', '/usr/bin/pkg-config']
+
+[host_machine]
+system = 'linux'
+# cpu_family = 'x86_64'
+# cpu = 'amd64'
+
+# ik this is wrong but workaround sanity check
+cpu_family = 'arm'
+cpu = 'armv7'
+
+endian = 'little'
+EOF
+
+        cat <<EOF >"android-drm-arm32"
+[binaries]
+ar = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar'
+c = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang', '-O3', '-DVK_USE_PLATFORM_ANDROID_KHR', '-fPIC']
+cpp = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang++', '-O3', '-DVK_USE_PLATFORM_ANDROID_KHR', '-fPIC', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
+c_ld = 'lld'
+cpp_ld = 'lld'
+strip = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip'
+# Android doesn't come with a pkg-config, but we need one for meson to be happy not
+# finding all the optional deps it looks for.  Use system pkg-config pointing at a
+# directory we get to populate with any .pc files we want to add for Android
+pkgconfig = ['env', 'PKG_CONFIG_LIBDIR=.', '/usr/bin/pkg-config']
+
+[host_machine]
+system = 'linux'
+# cpu_family = 'x86_64'
+# cpu = 'amd64'
+
+# ik this is wrong but workaround sanity check
+cpu_family = 'arm'
+cpu = 'armv7'
+
+endian = 'little'
+EOF
+
+        cat <<EOF >"android-drm-x86_64"
+[binaries]
+ar = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar'
+c = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android26-clang', '-O3', '-DVK_USE_PLATFORM_ANDROID_KHR', '-fPIC']
+cpp = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android26-clang++', '-O3', '-DVK_USE_PLATFORM_ANDROID_KHR', '-fPIC', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
+c_ld = 'lld'
+cpp_ld = 'lld'
+strip = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip'
+# Android doesn't come with a pkg-config, but we need one for meson to be happy not
+# finding all the optional deps it looks for.  Use system pkg-config pointing at a
+# directory we get to populate with any .pc files we want to add for Android
+pkgconfig = ['env', 'PKG_CONFIG_LIBDIR=.', '/usr/bin/pkg-config']
+
+[host_machine]
+system = 'linux'
+# cpu_family = 'x86_64'
+# cpu = 'amd64'
+
+# ik this is wrong but workaround sanity check
+cpu_family = 'arm'
+cpu = 'armv8'
+
+
+endian = 'little'
+EOF
+
+        cat <<EOF >"android-turnip-aarch64"
+[binaries]
+ar = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar'
+c = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang']
+cpp = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang++', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
+c_ld = 'lld'
+cpp_ld = 'lld'
+strip = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android-strip'
+pkgconfig = ['env', 'PKG_CONFIG_LIBDIR=.', '/usr/bin/pkg-config']
+[host_machine]
+system = 'android'
+cpu_family = 'aarch64'
+cpu = 'armv8'
+endian = 'little'
+EOF
+
+        cat <<EOF >"android-turnip-arm32"
+[binaries]
+ar = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar'
+c = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang']
+cpp = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi26-clang++', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
+c_ld = 'lld'
+cpp_ld = 'lld'
+strip = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/armv7a-linux-androideabi-strip'
+pkgconfig = ['env', 'PKG_CONFIG_LIBDIR=.', '/usr/bin/pkg-config']
+[host_machine]
+system = 'android'
+cpu_family = 'arm'
+cpu = 'armv7'
+endian = 'little'
+EOF
+
+        cat <<EOF >"android-turnip-x86_64"
+[binaries]
+ar = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar'
+c = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android26-clang']
+cpp = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android26-clang++', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
+c_ld = 'lld'
+cpp_ld = 'lld'
+strip = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android-strip'
+pkgconfig = ['env', 'PKG_CONFIG_LIBDIR=.', '/usr/bin/pkg-config']
+[host_machine]
+system = 'android'
+cpu_family = 'x86_64'
+cpu = 'amd64'
+endian = 'little'
+EOF
+
+        cat <<EOF >"android-x86_64"
+[binaries]
+ar = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar'
+c = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android26-clang', '-O3', '-DVK_USE_PLATFORM_ANDROID_KHR', '-fPIC']
+cpp = ['ccache', '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android26-clang++', '-O3', '-DVK_USE_PLATFORM_ANDROID_KHR', '-fPIC', '-fno-exceptions', '-fno-unwind-tables', '-fno-asynchronous-unwind-tables', '-static-libstdc++']
+c_ld = 'lld'
+cpp_ld = 'lld'
+strip = '$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip'
+# Android doesn't come with a pkg-config, but we need one for meson to be happy not
+# finding all the optional deps it looks for.  Use system pkg-config pointing at a
+# directory we get to populate with any .pc files we want to add for Android
+
+# Also, include the plain DRM lib we found earlier. Panfrost relies on it rather heavily, especially when
+# interacting with the panfrost DRM module and not kbase
+
+pkgconfig = ['env', 'PKG_CONFIG_LIBDIR=.:/tmp/drm-static/lib/pkgconfig', '/usr/bin/pkg-config']
+
+[host_machine]
+system = 'linux'
+# cpu_family = 'x86_64'
+# cpu = 'amd64'
+
+# ik this is wrong but workaround sanity check
+cpu_family = 'arm'
+cpu = 'armv8'
+
+
+endian = 'little'
+EOF
+
 	echo "Generating build files ..." $'\n'
+	meson build-android-aarch64 --prefix=/tmp/mesa --cross-file "$workdir"/mesa/android-aarch64 -Dbuildtype=release -Dplatforms=android -Dplatform-sdk-version=25 -Dandroid-stub=true -Degl=disabled -Dgbm=disabled -Dglx=disabled -Dgallium-drivers= -Dvulkan-drivers=freedreno -Dvulkan-beta=true -Dfreedreno-kmds=kgsl -Db_lto=true &> "$workdir"/meson_log
+
+	echo "Compiling build files ..." $'\n'
+	ninja -C build-android-aarch64 &> "$workdir"/ninja_log
+
+        echo "Generating build files ..." $'\n'
 	meson build-android-aarch64 --cross-file "$workdir"/mesa/android-aarch64 -Dbuildtype=release -Dplatforms=android -Dplatform-sdk-version=$sdkver -Dandroid-stub=true -Dgallium-drivers= -Dvulkan-drivers=freedreno -Dvulkan-beta=true -Dfreedreno-kmds=kgsl -Db_lto=true &> "$workdir"/meson_log
 
 	echo "Compiling build files ..." $'\n'
 	ninja -C build-android-aarch64 &> "$workdir"/ninja_log
+
 }
 
 port_lib_for_adrenotool(){
