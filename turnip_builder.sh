@@ -423,6 +423,8 @@ EOF
 	
 	echo "_If a patch is not present anymore, it's most likely because it got merged, is not needed anymore or was breaking something._" >> description
 
+        echo "## Testing For Android 10 ( I Dont Know Work Or Not )" >> description
+
 	if ! [ -a "$workdir"/"$filename".zip ];
 		then echo -e "$red-Packing failed!$nocolor" && exit 1
 		else echo -e "$green-All done, you can take your zip from this folder;$nocolor" && echo "$workdir"/
