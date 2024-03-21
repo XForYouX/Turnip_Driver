@@ -1,9 +1,14 @@
 name: Build "turnip"
 
 on:
-  workflow_dispatch:
   schedule:
   - cron: "* * * * *"
+  workflow_dispatch:
+   inputs:
+      android:
+        description: 'Whether to trigger an Android build (true/false/auto)'
+        required: false
+        default: 'true'
 
 jobs:
   start_building_turnip:
