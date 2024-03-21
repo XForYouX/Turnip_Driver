@@ -46,8 +46,6 @@ jobs:
       if: ${{ contains(steps.versions.outputs.experimental, 'true') }}
       uses: softprops/action-gh-release@v1
       with:
-        makeLatest: true
-        skipIfReleaseExists: true
         body_path: turnip_workdir/description
         name: ${{ steps.versions.outputs.name }}
         tag_name: ${{ steps.versions.outputs.tag }}
@@ -60,8 +58,6 @@ jobs:
       if: ${{ contains(steps.versions.outputs.patched, 'true') }}
       uses: softprops/action-gh-release@v1
       with:
-        makeLatest: true
-        skipIfReleaseExists: true
         body_path: turnip_workdir/description
         name: ${{ steps.versions.outputs.name }}
         tag_name: ${{ steps.versions.outputs.tag }}
@@ -73,8 +69,6 @@ jobs:
       if: ${{ contains(steps.versions.outputs.patched, 'false') }}
       uses: softprops/action-gh-release@v1
       with:
-        makeLatest: true
-        skipIfReleaseExists: true
         body_path: turnip_workdir/description
         name: ${{ steps.versions.outputs.name }}
         tag_name: ${{ steps.versions.outputs.tag }}
