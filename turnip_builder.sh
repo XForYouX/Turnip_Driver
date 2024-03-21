@@ -7,22 +7,28 @@ deps="meson ninja patchelf unzip curl pip flex bison zip git"
 workdir="$(pwd)/turnip_workdir"
 packagedir="$workdir/turnip_module"
 ndkver="android-ndk-r26c"
-sdkver="29"
+sdkver="33"
 mesasrc="https://gitlab.freedesktop.org/mesa/mesa.git"
 
 #array of string => commit/branch;patch args
-patches=(
-	"Mem-leaks-tu-shader;merge_requests/27847;"
+patches=(	
+	"visual-fix-issues-in-some-games-1;merge_requests/27986;--reverse"
+	"visual-fix-issues-in-some-games-2;commit/9de628b65ca36b920dc6181251b33c436cad1b68;--reverse"
+        "visual-fix-issues-in-some-game-3;merge_requests/28148;--reverse"
+	"8gen3-fix;merge_requests/27912;--reverse"
+	"mem-leaks-tu-shader;merge_requests/27847;--reverse"
+        "add-RMV-Support;commit/a13860e5dfd0cf28ff5292b410d5be44791ca7cc;--reverse"
+	"fix-color-buffer;commit/782fb8966bd59a40b905b17804c493a76fdea7a0;--reverse"
+        "Fix-undefined-value-gl_ClipDistance;merge_requests/28109;--reverse"
+	"tweak-attachment-validation;merge_requests/28135;--reverse"
 	"Fix-undefined-value-gl_ClipDistance;merge_requests/28109;"
-	"Visual-fixes-in-some-games;merge_requests/28148;"
 	"Add-PC_TESS_PARAM_SIZE-PC_TESS_FACTOR_SIZE;merge_requests/28210;"
 	"Dont-fast-clear-z-isNotEq-s;merge_requests/28249;"
-# 	"disable-gmem;commit/1ba6ccc51a4483a6d622c91fc43685150922dcdf;--reverse"
+ 	"disable-gmem;commit/1ba6ccc51a4483a6d622c91fc43685150922dcdf;--reverse"
+        "KHR_8bit_storage-support-fix-games-a7xx-break-some-a6xx;merge_requests/28254;"
+ 	"disable-gmem;commit/1ba6ccc51a4483a6d622c91fc43685150922dcdf;--reverse"
 )
-experimental_patches=(
-	"KHR_8bit_storage-support-fix-games-a7xx-break-some-a6xx;merge_requests/28254;"
-# 	"disable-gmem;commit/1ba6ccc51a4483a6d622c91fc43685150922dcdf;--reverse"
-)
+#patches=()
 commit=""
 commit_short=""
 mesa_version=""
@@ -43,11 +49,6 @@ run_all(){
 		port_lib_for_adrenotool "patched"
 	fi
 
-	if (( ${#experimental_patches[@]} )); then
-		prepare_workdir "experimental"
-		build_lib_for_android
-		port_lib_for_adrenotool "experimental"
-	fi
 }
 
 check_deps(){
@@ -109,42 +110,22 @@ prepare_workdir(){
 		patch=$(awk -F'VK_HEADER_VERSION |\n#define' '{print $2}' <<< $(cat include/vulkan/vulkan_core.h) | xargs)
 		vulkan_version="$major.$minor.$patch"
 	else		
-		cd mesa
-
-		if [ $1 == "patched" ]; then 
-			for patch in ${patches[@]}; do
-				echo "Applying patch $patch"
-				patch_source="$(echo $patch | cut -d ";" -f 2 | xargs)"
-				if [[ $patch_source == *"../.."* ]]; then
-					git apply "$patch_source"
-					sleep 1
-				else 
-					patch_file="${patch_source#*\/}"
-					patch_args=$(echo $patch | cut -d ";" -f 3 | xargs)
-					curl --output "$patch_file".patch -k --retry-delay 30 --retry 5 -f --retry-all-errors https://gitlab.freedesktop.org/mesa/mesa/-/"$patch_source".patch
-					sleep 1
-				
-					git apply $patch_args "$patch_file".patch
-				fi
-			done
+		if [ -z ${experimental_patches+x} ]; then
+			echo "No experimental patches found"; 
 		else 
-			for patch in ${experimental_patches[@]}; do
-				echo "Applying patch $patch"
-				patch_source="$(echo $patch | cut -d ";" -f 2 | xargs)"
-				if [[ $patch_source == *"../.."* ]]; then
-					git apply "$patch_source"
-					sleep 1
-				else 
-					patch_file="${patch_source#*\/}"
-					patch_args=$(echo $patch | cut -d ";" -f 3 | xargs)
-					curl --output "$patch_file".patch -k --retry-delay 30 --retry 5 -f --retry-all-errors https://gitlab.freedesktop.org/mesa/mesa/-/"$patch_source".patch
-					sleep 1
-				
-					git apply $patch_args "$patch_file".patch
-				fi
-			done
+			patches=("${experimental_patches[@]}" "${patches[@]}")
 		fi
+
+		cd mesa
+		for patch in ${patches[@]}; do
+			echo "Applying patch $patch"
+			patch_source="$(echo $patch | cut -d ";" -f 2 | xargs)"
+			patch_file="${patch_source#*\/}"
+			patch_args=$(echo $patch | cut -d ";" -f 3 | xargs)
+			curl --output "$patch_file".patch -k --retry 5  https://gitlab.freedesktop.org/mesa/mesa/-/"$patch_source".patch
 		
+			git apply $patch_args "$patch_file".patch
+		done
 	fi
 }
 
@@ -359,6 +340,7 @@ cpu = 'armv8'
 endian = 'little'
 EOF
 
+
 	echo "Generating build files ..." $'\n'
 	meson build-android-aarch64 --prefix=/tmp/mesa --cross-file "$workdir"/mesa/android-aarch64 -Dbuildtype=release -Dplatforms=android -Dplatform-sdk-version=25 -Dandroid-stub=true -Degl=disabled -Dgbm=disabled -Dglx=disabled -Dgallium-drivers= -Dvulkan-drivers=freedreno -Dvulkan-beta=true -Dfreedreno-kmds=kgsl -Db_lto=true &> "$workdir"/meson_log
 
@@ -378,89 +360,69 @@ port_lib_for_adrenotool(){
 	cp "$workdir"/mesa/build-android-aarch64/src/freedreno/vulkan/libvulkan_freedreno.so "$workdir"
 	cd "$workdir"
 	patchelf --set-soname vulkan.adreno.so libvulkan_freedreno.so
-	mv libvulkan_freedreno.so vulkan.ad07XX.so
+	mv libvulkan_freedreno.so vulkan.ad06XX.so
 
-	if ! [ -a vulkan.ad07XX.so ]; then
+	if ! [ -a vulkan.ad06XX.so ]; then
 		echo -e "$red Build failed! $nocolor" && exit 1
 	fi
 
 	mkdir -p "$packagedir" && cd "$_"
 
 	date=$(date +'%b %d, %Y')
-	suffix=""
+	patched=""
 
 	if [ ! -z "$1" ]; then
-		suffix="_$1"
+		patched="_patched"
 	fi
 
 	cat <<EOF >"meta.json"
 {
   "schemaVersion": 1,
-  "name": "Turnip - $date - $commit_short$suffix",
-  "description": "Compiled from Mesa, Commit $commit_short$suffix",
+  "name": "Turnip - $date - $commit_short$patched",
+  "description": "Compiled from Mesa, Commit $commit_short$patched",
   "author": "mesa",
   "packageVersion": "1",
   "vendor": "Mesa",
   "driverVersion": "$mesa_version/vk$vulkan_version",
   "minApi": 27,
-  "libraryName": "vulkan.ad07XX.so"
+  "libraryName": "vulkan.ad06XX.so"
 }
 EOF
 
 	filename=turnip_"$(date +'%b-%d-%Y')"_"$commit_short"
 	echo "Copy necessary files from work directory ..." $'\n'
-	cp "$workdir"/vulkan.ad07XX.so "$packagedir"
+	cp "$workdir"/vulkan.ad06XX.so "$packagedir"
 
 	echo "Packing files in to adrenotool package ..." $'\n'
-	zip -9 "$workdir"/"$filename$suffix".zip ./*
+	zip -9 "$workdir"/"$filename$patched".zip ./*
 
 	cd "$workdir"
-
-	if [ -z "$1" ]; then
-		echo "Turnip - $mesa_version - $date" > release
-		echo "$mesa_version"_"$commit_short" > tag
-		echo  $filename > filename
-		echo "### Base commit : [$commit_short](https://gitlab.freedesktop.org/mesa/mesa/-/commit/$commit_short)" > description
+	
+	echo "Turnip - $mesa_version - $date" > release
+	echo "$mesa_version"_"$commit_short" > tag
+	echo  $filename > filename
+	echo "### Base commit : [$commit_short](https://gitlab.freedesktop.org/mesa/mesa/-/commit/7d9ba366d4098a49975e87cb1814f61eb43f52a1)" > description
+	echo "## Upstreams / Patches" >> description
+	
+	if (( ${#patches[@]} )); then
+		echo "These have not been merged by Mesa officially yet and may introduce bugs or" >> description
+		echo "we revert stuff that breaks games but still got merged in (see --reverse)" >> description
+		for patch in ${patches[@]}; do
+			patch_name="$(echo $patch | cut -d ";" -f 1 | xargs)"
+			patch_source="$(echo $patch | cut -d ";" -f 2 | xargs)"
+			patch_args="$(echo $patch | cut -d ";" -f 3 | xargs)"
+			echo "- $patch_name, [$patch_source](https://gitlab.freedesktop.org/mesa/mesa/-/$patch_source), $patch_args" >> description
+		done
+		echo "true" > patched
+		echo "" >> description
+		echo "_Upstreams / Patches are only applied to the patched version (\_patched.zip)_" >> description
+	else
+		echo "No patch" >> description
 		echo "false" > patched
-		echo "false" > experimental
-	else		
-		if [ $1 == "patched" ]; then 
-			echo "## Upstreams / Patches" >> description
-			echo "These have not been merged by Mesa officially yet and may introduce bugs or" >> description
-			echo "we revert stuff that breaks games but still got merged in (see --reverse)" >> description
-			for patch in ${patches[@]}; do
-				patch_name="$(echo $patch | cut -d ";" -f 1 | xargs)"
-				patch_source="$(echo $patch | cut -d ";" -f 2 | xargs)"
-				patch_args="$(echo $patch | cut -d ";" -f 3 | xargs)"
-				if [[ $patch_source == *"../.."* ]]; then
-					echo "- $patch_name, $patch_source, $patch_args" >> description
-				else 
-					echo "- $patch_name, [$patch_source](https://gitlab.freedesktop.org/mesa/mesa/-/$patch_source), $patch_args" >> description
-				fi
-			done
-			echo "true" > patched
-			echo "" >> description
-			echo "_Upstreams / Patches are only applied to the patched version (\_patched.zip)_" >> description
-			echo "_If a patch is not present anymore, it's most likely because it got merged, is not needed anymore or was breaking something._" >> description
-		else 
-			echo "### Upstreams / Patches (Experimental)" >> description
-			echo "Include previously listed patches + experimental ones" >> description
-			for patch in ${experimental_patches[@]}; do
-				patch_name="$(echo $patch | cut -d ";" -f 1 | xargs)"
-				patch_source="$(echo $patch | cut -d ";" -f 2 | xargs)"
-				patch_args="$(echo $patch | cut -d ";" -f 3 | xargs)"
-				if [[ $patch_source == *"../.."* ]]; then
-					echo "- $patch_name, $patch_source, $patch_args" >> description
-				else 
-					echo "- $patch_name, [$patch_source](https://gitlab.freedesktop.org/mesa/mesa/-/$patch_source), $patch_args" >> description
-				fi
-			done
-			echo "true" > experimental
-			echo "" >> description
-			echo "_Experimental patches are only applied to the experimental version (\_experimental.zip)_" >> description
-		fi
 	fi
 	
+	echo "_If a patch is not present anymore, it's most likely because it got merged, is not needed anymore or was breaking something._" >> description
+
 	if ! [ -a "$workdir"/"$filename".zip ];
 		then echo -e "$red-Packing failed!$nocolor" && exit 1
 		else echo -e "$green-All done, you can take your zip from this folder;$nocolor" && echo "$workdir"/
